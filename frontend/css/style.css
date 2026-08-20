@@ -350,3 +350,16 @@ footer {
   font-size: 0.78rem;
   padding: 20px;
 }
+.logo-ufpa {
+  height: 40px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.bandeira-para {
+  height: 28px;
+  width: auto;
+  flex-shrink: 0;
+  margin-left: auto;
+  border-radius: 3px;
+}
