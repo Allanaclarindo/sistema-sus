@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SUS Ágil — Sistema de Atendimento por Cartão SUS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">+</span>
+      <div>
+        <h1>SUS Ágil</h1>
+        <p>Identificação por Cartão SUS · Fila inteligente · Histórico unificado</p>
+      </div>
+    </div>
+    <div id="api-indicator" class="api-indicator" title="Status da conexão com o servidor">
+      <span class="dot"></span> <span class="txt">verificando servidor…</span>
+    </div>
+  </header>
+
+  <!-- Elemento assinatura: linha do tempo do fluxo de atendimento -->
+  <div class="fluxo">
+    <div class="fluxo-etapa" data-etapa="chegada"><span class="num">01</span>Chegada &amp; identificação</div>
+    <div class="fluxo-linha"></div>
+    <div class="fluxo-etapa" data-etapa="triagem"><span class="num">02</span>Classificação de risco</div>
+    <div class="fluxo-linha"></div>
+    <div class="fluxo-etapa" data-etapa="fila"><span class="num">03</span>Fila priorizada</div>
+    <div class="fluxo-linha"></div>
+    <div class="fluxo-etapa" data-etapa="atendimento"><span class="num">04</span>Atendimento com histórico</div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="recepcao">Recepção</button>
+    <button class="tab-btn" data-tab="fila">Fila de atendimento</button>
+    <button class="tab-btn" data-tab="atendimento">Painel do profissional</button>
+  </nav>
+
+  <main>
+
+    <!-- ===================== RECEPÇÃO ===================== -->
+    <section id="tab-recepcao" class="tab-content active">
+      <div class="grid-2">
+
+        <div class="card">
+          <h2>Identificar paciente pelo Cartão SUS</h2>
+          <p class="hint">Digite o número do CNS (simulando a leitura do cartão). Use um dos CNS de teste do seed, ex: <code>700000000000001</code>.</p>
+          <form id="form-busca-cns">
+            <label for="input-cns">Número do CNS</label>
+            <input id="input-cns" name="cns" maxlength="15" placeholder="15 dígitos" required />
+            <button type="submit">Buscar paciente</button>
+          </form>
+          <div id="resultado-busca" class="resultado"></div>
+        </div>
+
+        <div class="card">
+          <h2>Cadastrar novo paciente</h2>
+          <p class="hint">Use quando o CNS não for encontrado — primeira vez do paciente nesta unidade.</p>
+          <form id="form-cadastro">
+            <label for="cad-cns">Número do CNS</label>
+            <input id="cad-cns" name="cns" maxlength="15" placeholder="15 dígitos" required />
+
+            <label for="cad-nome">Nome completo</label>
+            <input id="cad-nome" name="nome" required />
+
+            <label for="cad-nasc">Data de nascimento</label>
+            <input id="cad-nasc" name="data_nasc" type="date" required />
+
+            <label for="cad-sexo">Sexo</label>
+            <select id="cad-sexo" name="sexo">
+              <option value="">Não informar</option>
+              <option value="F">Feminino</option>
+              <option value="M">Masculino</option>
+            </select>
+
+            <label for="cad-tel">Telefone</label>
+            <input id="cad-tel" name="telefone" placeholder="(00) 00000-0000" />
+
+            <button type="submit">Cadastrar</button>
+          </form>
+          <div id="resultado-cadastro" class="resultado"></div>
+        </div>
+
+      </div>
+
+      <div class="card" id="card-checkin" hidden>
+        <h2>Check-in na fila</h2>
+        <p class="hint">Paciente selecionado: <strong id="checkin-nome"></strong></p>
+        <form id="form-checkin">
+          <label for="checkin-prioridade">Classificação de risco (Protocolo de Manchester)</label>
+          <select id="checkin-prioridade" name="prioridade" required>
+            <option value="1">🔴 Emergência — risco imediato de morte</option>
+            <option value="2">🟠 Muito urgente</option>
+            <option value="3">🟡 Urgente</option>
+            <option value="4" selected>🟢 Pouco urgente</option>
+            <option value="5">🔵 Não urgente</option>
+          </select>
+
+          <label for="checkin-queixa">Queixa principal</label>
+          <input id="checkin-queixa" name="queixa" placeholder="Ex: dor abdominal, febre, retorno de exame..." />
+
+          <button type="submit">Adicionar à fila</button>
+        </form>
+        <div id="resultado-checkin" class="resultado"></div>
+      </div>
+    </section>
+
+    <!-- ===================== FILA ===================== -->
+    <section id="tab-fila" class="tab-content">
+      <div class="card">
+        <div class="card-header-row">
+          <h2>Fila de atendimento</h2>
+          <button id="btn-atualizar-fila" class="btn-secundario">Atualizar</button>
+        </div>
+        <p class="hint">Ordenada por prioridade clínica e depois por ordem de chegada — não por ordem de chegada apenas.</p>
+        <div id="lista-fila" class="lista-fila"></div>
+      </div>
+    </section>
+
+    <!-- ===================== ATENDIMENTO ===================== -->
+    <section id="tab-atendimento" class="tab-content">
+      <div class="grid-2">
+        <div class="card">
+          <h2>Pacientes em atendimento</h2>
+          <p class="hint">Chame o paciente na aba "Fila" primeiro; ele aparece aqui para registro clínico.</p>
+          <div id="lista-em-atendimento" class="lista-fila"></div>
+        </div>
+
+        <div class="card" id="card-historico" hidden>
+          <h2>Histórico de <span id="hist-nome"></span></h2>
+          <div id="hist-lista" class="historico-lista"></div>
+
+          <hr />
+
+          <h3>Registrar nova consulta / exame</h3>
+          <form id="form-registro">
+            <label for="reg-tipo">Tipo</label>
+            <select id="reg-tipo" name="tipo" required>
+              <option value="consulta">Consulta</option>
+              <option value="exame">Exame</option>
+            </select>
+
+            <label for="reg-descricao">Descrição</label>
+            <input id="reg-descricao" name="descricao" placeholder="Ex: Consulta - Clínica Geral" required />
+
+            <label for="reg-profissional">Profissional responsável</label>
+            <input id="reg-profissional" name="profissional" placeholder="Ex: Dra. Fernanda Reis" />
+
+            <label for="reg-resultado">Observações / resultado</label>
+            <textarea id="reg-resultado" name="resultado" rows="3"></textarea>
+
+            <button type="submit">Salvar no histórico</button>
+            <button type="button" id="btn-finalizar" class="btn-secundario">Finalizar atendimento</button>
+          </form>
+          <div id="resultado-registro" class="resultado"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Protótipo acadêmico — proposta de sistema de atendimento hospitalar com identificação unificada via Cartão SUS (CNS).</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
