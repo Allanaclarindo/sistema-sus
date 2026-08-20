@@ -363,3 +363,13 @@ footer {
   margin-left: auto;
   border-radius: 3px;
 }
+
+.logo-badge {
+  background: white;
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
