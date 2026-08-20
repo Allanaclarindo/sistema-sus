@@ -3,7 +3,7 @@
 
 // ⚠️ Ao hospedar o back-end (Render/Railway/etc.), troque a URL abaixo pela
 // URL pública do seu servidor, ex: "https://sistema-sus-backend.onrender.com/api"
-const API_BASE = "http://sistema-sus.onrender.com/api";
+const API_BASE = "https://sistema-sus.onrender.com/api";
 
 let pacienteSelecionado = null; // paciente atualmente identificado na recepção
 let itemFilaEmAtendimento = null; // item da fila aberto no painel do profissional
